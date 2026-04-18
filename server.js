@@ -233,6 +233,42 @@ app.delete("/api/page/post/:postId", async (req, res) => {
   }
 });
 
+//5. Lấy comments của bài viết theo postId
+/**
+ * @swagger
+ * /api/page/post/{postId}/comments:
+ *   get:
+ *     summary: Lấy comments của bài viết
+ *     tags: [Page API]
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Thành công
+ */
+app.get("/api/page/post/:postId/comments", async (req, res) => {
+  try {
+    const { postId } = req.params;
+
+    const response = await graph.get(`/${postId}/comments`, {
+      params: {
+        fields: "id,message,from,created_time,like_count,comment_count",
+        access_token: PAGE_ACCESS_TOKEN
+      }
+    });
+
+    res.json({
+      success: true,
+      data: response.data
+    });
+  } catch (err) {
+    res.status(err.response?.status || 500).json(buildError(err));
+  }
+});
 
 /**
  * Route test
