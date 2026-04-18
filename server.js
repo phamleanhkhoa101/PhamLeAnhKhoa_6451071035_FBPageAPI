@@ -307,50 +307,7 @@ app.get("/api/page/post/:postId/likes", async (req, res) => {
   }
 });
 
-// //7. Lấy insights của Page theo pageId
-// /**
-//  * @swagger
-//  * /api/page/{pageId}/insights:
-//  *   get:
-//  *     summary: Lấy insights của Page
-//  *     tags: [Page API]
-//  *     parameters:
-//  *       - in: path
-//  *         name: pageId
-//  *         required: true
-//  *         schema:
-//  *           type: string
-//  *     responses:
-//  *       200:
-//  *         description: Thành công
-//  */
-// app.get("/api/page/:pageId/insights", async (req, res) => {
-//   try {
-//     const { pageId } = req.params;
-
-//     const metrics = [
-//     "page_impressions",
-//     "page_reach_total",
-//     "page_post_engagements"
-//     ].join(",");
-
-//     const response = await graph.get(`/${pageId}/insights`, {
-//     params: {
-//         metric: metrics,
-//         access_token: PAGE_ACCESS_TOKEN
-//     }
-//     });
-
-//     res.json({
-//       success: true,
-//       data: response.data
-//     });
-//   } catch (err) {
-//     res.status(err.response?.status || 500).json(buildError(err));
-//   }
-// });
-
-
+//7. Lấy insights của Page theo pageId
 /**
  * @swagger
  * /api/page/{pageId}/insights:
@@ -371,11 +328,9 @@ app.get("/api/page/:pageId/insights", async (req, res) => {
   try {
     const { pageId } = req.params;
 
-    // Sử dụng metric page_views_total với period=day
     const metrics = "page_views_total";
-    const period = "day";  // Thử lấy dữ liệu theo ngày
+    const period = "day";  
 
-    // API request để lấy insights
     const response = await graph.get(`/${pageId}/insights`, {
       params: {
         metric: metrics,
