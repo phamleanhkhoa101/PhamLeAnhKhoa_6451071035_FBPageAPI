@@ -62,49 +62,86 @@ function buildError(err) {
     message: err.message || "Unknown server error"
   };
 }
-//1. Lấy thông tin Page
-/**
- * @swagger
- * /api/page/{pageId}:
- *   get:
- *     summary: Lấy thông tin Page
- *     tags: [Page API]
- *     parameters:
- *       - in: path
- *         name: pageId
- *         required: true
- *         schema:
- *           type: string
- *         description: ID của Page
- *     responses:
- *       200:
- *         description: Thành công
- */
-app.get("/api/page/:pageId", async (req, res) => {
-  try {
-    const { pageId } = req.params;
+    //1. Lấy thông tin Page
+    /**
+     * @swagger
+     * /api/page/{pageId}:
+     *   get:
+     *     summary: Lấy thông tin Page
+     *     tags: [Page API]
+     *     parameters:
+     *       - in: path
+     *         name: pageId
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: ID của Page
+     *     responses:
+     *       200:
+     *         description: Thành công
+     */
+    app.get("/api/page/:pageId", async (req, res) => {
+    try {
+        const { pageId } = req.params;
 
-    const response = await graph.get(`/${pageId}`, {
-      params: {
-        fields: "id,name,about,category,fan_count,followers_count,link,picture{url}",
-        access_token: PAGE_ACCESS_TOKEN
-      }
+        const response = await graph.get(`/${pageId}`, {
+        params: {
+            fields: "id,name,about,category,fan_count,followers_count,link,picture{url}",
+            access_token: PAGE_ACCESS_TOKEN
+        }
+        });
+
+        res.json({
+        success: true,
+        data: response.data
+        });
+    } catch (err) {
+        res.status(err.response?.status || 500).json(buildError(err));
+    }
+    });
+    //2. Lấy danh sách bài viết của Page
+    /**
+     * @swagger
+     * /api/page/{pageId}/posts:
+     *   get:
+     *     summary: Lấy danh sách bài viết của Page
+     *     tags: [Page API]
+     *     parameters:
+     *       - in: path
+     *         name: pageId
+     *         required: true
+     *         schema:
+     *           type: string
+     *     responses:
+     *       200:
+     *         description: Thành công
+     */
+    app.get("/api/page/:pageId/posts", async (req, res) => {
+    try {
+        const { pageId } = req.params;
+
+        const response = await graph.get(`/${pageId}/posts`, {
+        params: {
+            fields: "id,message,created_time,permalink_url,full_picture,attachments,likes.summary(true),comments.summary(true)",
+            access_token: PAGE_ACCESS_TOKEN
+        }
+        });
+
+        res.json({
+        success: true,
+        data: response.data
+        });
+    } catch (err) {
+        res.status(err.response?.status || 500).json(buildError(err));
+    }
     });
 
-    res.json({
-      success: true,
-      data: response.data
-    });
-  } catch (err) {
-    res.status(err.response?.status || 500).json(buildError(err));
-  }
-});
-//2. Lấy danh sách bài viết của Page
+    //3. Tạo bài viết mới cho Page
 /**
  * @swagger
  * /api/page/{pageId}/posts:
- *   get:
- *     summary: Lấy danh sách bài viết của Page
+ *   post:
+ *     summary: Tạo bài viết mới cho Page
  *     tags: [Page API]
  *     parameters:
  *       - in: path
@@ -112,29 +149,53 @@ app.get("/api/page/:pageId", async (req, res) => {
  *         required: true
  *         schema:
  *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               message:
+ *                 type: string
+ *                 example: Xin chào từ Swagger
  *     responses:
  *       200:
  *         description: Thành công
  */
-app.get("/api/page/:pageId/posts", async (req, res) => {
+app.post("/api/page/:pageId/posts", async (req, res) => {
   try {
     const { pageId } = req.params;
+    const { message } = req.body;
 
-    const response = await graph.get(`/${pageId}/posts`, {
-      params: {
-        fields: "id,message,created_time,permalink_url,full_picture,attachments,likes.summary(true),comments.summary(true)",
-        access_token: PAGE_ACCESS_TOKEN
+    if (!message || !message.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "message là bắt buộc"
+      });
+    }
+
+    const response = await graph.post(
+      `/${pageId}/feed`,
+      null,
+      {
+        params: {
+          message,
+          access_token: PAGE_ACCESS_TOKEN
+        }
       }
-    });
+    );
 
     res.json({
       success: true,
+      message: "Đăng bài viết thành công",
       data: response.data
     });
   } catch (err) {
     res.status(err.response?.status || 500).json(buildError(err));
   }
 });
+
 
 /**
  * Route test
