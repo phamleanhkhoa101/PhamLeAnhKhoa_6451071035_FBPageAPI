@@ -62,7 +62,7 @@ function buildError(err) {
     message: err.message || "Unknown server error"
   };
 }
-
+//1. Lấy thông tin Page
 /**
  * @swagger
  * /api/page/{pageId}:
@@ -99,7 +99,42 @@ app.get("/api/page/:pageId", async (req, res) => {
     res.status(err.response?.status || 500).json(buildError(err));
   }
 });
+//2. Lấy danh sách bài viết của Page
+/**
+ * @swagger
+ * /api/page/{pageId}/posts:
+ *   get:
+ *     summary: Lấy danh sách bài viết của Page
+ *     tags: [Page API]
+ *     parameters:
+ *       - in: path
+ *         name: pageId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Thành công
+ */
+app.get("/api/page/:pageId/posts", async (req, res) => {
+  try {
+    const { pageId } = req.params;
 
+    const response = await graph.get(`/${pageId}/posts`, {
+      params: {
+        fields: "id,message,created_time,permalink_url,full_picture,attachments,likes.summary(true),comments.summary(true)",
+        access_token: PAGE_ACCESS_TOKEN
+      }
+    });
+
+    res.json({
+      success: true,
+      data: response.data
+    });
+  } catch (err) {
+    res.status(err.response?.status || 500).json(buildError(err));
+  }
+});
 
 /**
  * Route test
