@@ -196,6 +196,43 @@ app.post("/api/page/:pageId/posts", async (req, res) => {
   }
 });
 
+//4. Xóa bài viết theo postId
+/**
+ * @swagger
+ * /api/page/post/{postId}:
+ *   delete:
+ *     summary: Xóa bài viết theo postId
+ *     tags: [Page API]
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Thành công
+ */
+app.delete("/api/page/post/:postId", async (req, res) => {
+  try {
+    const { postId } = req.params;
+
+    const response = await graph.delete(`/${postId}`, {
+      params: {
+        access_token: PAGE_ACCESS_TOKEN
+      }
+    });
+
+    res.json({
+      success: true,
+      message: "Xóa bài viết thành công",
+      data: response.data
+    });
+  } catch (err) {
+    res.status(err.response?.status || 500).json(buildError(err));
+  }
+});
+
 
 /**
  * Route test
