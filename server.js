@@ -270,6 +270,44 @@ app.get("/api/page/post/:postId/comments", async (req, res) => {
   }
 });
 
+//6. Lấy likes của bài viết theo postId
+/**
+ * @swagger
+ * /api/page/post/{postId}/likes:
+ *   get:
+ *     summary: Lấy likes của bài viết
+ *     tags: [Page API]
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Thành công
+ */
+app.get("/api/page/post/:postId/likes", async (req, res) => {
+  try {
+    const { postId } = req.params;
+
+    const response = await graph.get(`/${postId}/likes`, {
+      params: {
+        summary: true,
+        access_token: PAGE_ACCESS_TOKEN
+      }
+    });
+
+    res.json({
+      success: true,
+      data: response.data
+    });
+  } catch (err) {
+    res.status(err.response?.status || 500).json(buildError(err));
+  }
+});
+
+
 /**
  * Route test
  */
